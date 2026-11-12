@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "lint:fix": "eslint . --fix",
-    "format": "eslint . --fix --fix-type layout"
+    "format": "eslint . --fix --fix-type layout",
+    "prepare": "husky"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
@@ -47,10 +48,15 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.13.0",
+    "husky": "^9.1.7",
     "jsdom": "^31.0.0",
+    "lint-staged": "^17.6.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.6",
     "vitest": "^5.1.0"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": "eslint --max-warnings=0 --no-warn-ignored"
   }
 }
