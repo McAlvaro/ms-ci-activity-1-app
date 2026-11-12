@@ -1,93 +1,101 @@
-# Contacts App
+# Actividad: calidad de código en el editor y hooks de Git
 
-Single-page contacts manager built with React, TypeScript, Vite, Tailwind CSS v4 and shadcn/ui.
-Features: list, case-insensitive search (name, email, phone), add, edit, delete with confirmation,
-and persistence in `localStorage`.
-
-## Setup
+Proyecto `ms-ci-activity-1-app` (React + TypeScript + Vite). Editor: Neovim 0.11.
 
 ```bash
-npm install
+npm install   # instala dependencias y activa los hooks mediante `prepare`
 ```
 
-## Run
+## Resumen
+
+| Requisito | Solución | Archivos |
+| --- | --- | --- |
+| 1. SonarLint y linter en el editor | ESLint (flat config) como LSP en Neovim; SonarLint con `sonarlint.nvim` | `eslint.config.js`, fragmentos Lua de este README |
+| 2. `.editorconfig` / config del linter | `.editorconfig` en la raíz (Neovim lo lee de forma nativa) | `.editorconfig`, `eslint.config.js` |
+| 3. Regla de tabuladores | `@stylistic/indent: ['error', 'tab']` | `eslint.config.js`, `package.json` |
+| 4. Hooks de Git | Husky + lint-staged (`eslint --fix`) + commitlint | `.husky/pre-commit`, `.husky/commit-msg`, `.husky/pre-push`, `commitlint.config.js`, `package.json` |
+
+## 1. Linter y SonarLint
+
+- ESLint: `eslint.config.js`, ejecutado con `npm run lint` y como servidor `eslint` en Neovim.
+- SonarLint: `sonarlint.nvim` en modo standalone (sin SonarQube/SonarCloud); sin dependencias en el proyecto.
+
+## 2. `.editorconfig`
+
+- Todos los archivos: `charset = utf-8`, `end_of_line = lf`, `insert_final_newline = true`, `trim_trailing_whitespace = true`.
+- Indentación: `indent_style = tab`, `indent_size = tab`, `tab_width = 2`.
+- `json`, `jsonc`, `yml`, `yaml`, `md`: 2 espacios.
+- `*.md`: `trim_trailing_whitespace = false`.
+
+## 3. Regla de tabuladores
+
+En `eslint.config.js` con `@stylistic/eslint-plugin`:
+
+- `@stylistic/indent: ['error', 'tab']`
+- `@stylistic/jsx-indent-props: ['error', 'tab']`
+- `@stylistic/no-mixed-spaces-and-tabs: 'error'`
+
+Scripts de `package.json`:
+
+- `npm run lint`: ESLint.
+- `npm run lint:fix`: `eslint . --fix`.
+- `npm run format`: `eslint . --fix --fix-type layout`.
+- `npm run check`: lint + typecheck + test + build.
+
+## 4. Hooks (Husky + lint-staged)
+
+| Hook | Comando | Acción |
+| --- | --- | --- |
+| `pre-commit` | `npx lint-staged` | `eslint --fix` sobre archivos `js/ts/tsx` staged; corrige y re-agrega los archivos al commit. Bloquea solo si quedan errores sin corrección automática |
+| `commit-msg` | `npx --no -- commitlint --edit "$1"` | Conventional Commits: `tipo(scope): resumen`, scope obligatorio. Ejemplo: `feat(contacts): add search` |
+| `pre-push` | `npm run test` | Pruebas unitarias |
+
+- `prepare`: `husky` (instala los hooks en `npm install`).
+- `commitlint.config.js`: `@commitlint/config-conventional` + `scope-empty` obligatorio.
+
+Demostración del mensaje de commit:
 
 ```bash
-npm run dev      # start the dev server
-npm run build    # type-check and build for production
-npm run preview  # preview the production build
+echo "bad message" | npx commitlint                  # -> código 1 (rechazado)
+echo "feat(hooks): add commitlint" | npx commitlint  # -> código 0
 ```
 
-## Test and quality checks
+Demostración de la corrección automática de indentación:
 
 ```bash
-npm run test       # unit and component tests (Vitest + Testing Library)
-npm run lint       # ESLint
-npm run typecheck  # TypeScript
-npm run check      # lint + typecheck + test + build
+printf 'export function demo() {\n  return 1\n}\n' > src/demo.ts
+git add src/demo.ts
+npx lint-staged   # -> código 0; src/demo.ts queda con tabuladores y sigue staged
+git restore --staged src/demo.ts
+rm src/demo.ts
 ```
 
-## Code style and Git hooks
+## Configuración de Neovim
 
-### Indentation
+Fragmentos para `lazy.nvim`, Neovim 0.11+.
 
-The project is indented with **tabs** (display width 2). The rule lives in two places:
+### a) EditorConfig (integrado)
 
-- `.editorconfig` tells editors to use tabs for source files (JSON, YAML and Markdown use 2 spaces).
-- `@stylistic/eslint-plugin` enforces it in ESLint (`@stylistic/indent`, `@stylistic/jsx-indent-props`,
-  `@stylistic/no-mixed-spaces-and-tabs`). This includes the generated `src/components/ui` files, which
-  are otherwise excluded from the quality rules.
+Sin instalación. Comprobación: `:verbose set noexpandtab? tabstop? shiftwidth?` en un `.tsx`.
 
-```bash
-npm run format    # fix layout (indentation) problems only
-npm run lint:fix  # apply every auto-fixable ESLint problem
-```
+### b) ESLint (servidor de lenguaje)
 
-### Git hooks (Husky)
-
-Hooks are installed automatically by `npm install` (the `prepare` script).
-
-| Hook         | Command                                      | What it does                                                          |
-| ------------ | -------------------------------------------- | --------------------------------------------------------------------- |
-| `pre-commit` | `npx lint-staged`                            | Runs ESLint with `--max-warnings=0` on staged `js/ts/tsx` files. It only rejects; it never rewrites your files. |
-| `pre-push`   | `npm run check`                              | Runs lint, typecheck, tests and build before anything is pushed.      |
-
-If a commit is rejected, run `npm run format` (or `npm run lint:fix`), review the changes, stage them and commit again.
-
-**Do not use `--no-verify`.** Fix the reported problem instead of skipping the hooks.
-
-### Neovim setup
-
-The snippets below are for your own Neovim configuration; nothing here is applied by the repository.
-They are written for `lazy.nvim` and Neovim 0.11+.
-
-#### 1. EditorConfig (built in)
-
-Neovim 0.9+ reads `.editorconfig` natively, so no plugin is needed. Check it with `:verbose set noexpandtab? tabstop? shiftwidth?`
-in a `.tsx` file.
-
-Warning: if you have a formatter on save (for example `conform.nvim` with `prettier`/`prettierd`) it will
-rewrite the code with spaces and fight against the tab rule. For this project either skip Prettier for
-JS/TS or run `:LspEslintFixAll` after formatting, and prefer `npm run format`.
-
-#### 2. ESLint (language server)
-
-Install the server with Mason (package `eslint-lsp`, lspconfig name `eslint`) and enable it:
+Paquete de Mason `eslint-lsp` (lspconfig: `eslint`):
 
 ```lua
 -- lua/plugins/eslint.lua
 return {
 	{
 		"neovim/nvim-lspconfig",
-		dependencies = { "williamboman/mason.nvim", "williamboman/mason-lspconfig.nvim" },
+		dependencies = { "mason-org/mason.nvim", "mason-org/mason-lspconfig.nvim" },
 		config = function()
 			require("mason").setup()
 			require("mason-lspconfig").setup({ ensure_installed = { "eslint" } })
 
 			vim.lsp.config("eslint", {
-				-- Uses eslint.config.js (flat config) from the project root.
+				-- Usa eslint.config.js (flat config) desde la raíz del proyecto.
 				on_attach = function(_, bufnr)
-					-- Fix all auto-fixable problems on save.
+					-- Corrige al guardar todos los problemas corregibles automáticamente.
 					vim.api.nvim_create_autocmd("BufWritePre", {
 						buffer = bufnr,
 						command = "LspEslintFixAll",
@@ -100,34 +108,26 @@ return {
 }
 ```
 
-Alternative with `nvim-lint` (diagnostics only, runs the local `eslint` binary):
+### c) SonarLint
 
-```lua
-require("lint").linters_by_ft = {
-	javascript = { "eslint" },
-	typescript = { "eslint" },
-	typescriptreact = { "eslint" },
-}
-```
-
-#### 3. SonarLint
+Nota: la URL de `sonarlint.nvim`, el paquete `sonarlint-language-server` y la ruta del `.jar` NO están verificados.
 
 ```lua
 -- lua/plugins/sonarlint.lua
 return {
 	"schrieveslaach/sonarlint.nvim",
 	url = "https://gitlab.com/schrieveslaach/sonarlint.nvim",
-	dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
+	dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
 	ft = { "typescript", "typescriptreact", "javascript" },
 	config = function()
 		require("sonarlint").setup({
 			server = {
 				cmd = {
 					"sonarlint-language-server",
-					-- Ensure that sonarlint-language-server uses stdio channel
+					-- Asegura que sonarlint-language-server use el canal stdio
 					"-stdio",
 					"-analyzers",
-					-- Analyzer jars installed by the Mason package.
+					-- Archivos jar de analizadores instalados por el paquete de Mason.
 					vim.fn.expand("$MASON/share/sonarlint-analyzers/sonarjs.jar"),
 				},
 			},
@@ -137,5 +137,13 @@ return {
 }
 ```
 
-Install the server with `:MasonInstall sonarlint-language-server`. It runs in standalone mode (no SonarQube/SonarCloud
-connection), so no `connected` configuration is needed.
+Instalación: `:MasonInstall sonarlint-language-server`.
+
+## Verificación
+
+```bash
+npm run lint
+npm run check   # lint + typecheck + test + build (manual)
+echo "feat(hooks): add commitlint" | npx commitlint
+git config core.hooksPath  # .husky/_
+```
