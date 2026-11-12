@@ -25,7 +25,11 @@ export function ContactForm({ defaultValues, onSubmit, onCancel, submitLabel }: 
 	})
 
 	return (
-		<form onSubmit={handleSubmit((values) => onSubmit(values))} noValidate className="flex flex-col gap-4">
+		<form
+			onSubmit={handleSubmit((values) => onSubmit(values))}
+			noValidate
+			className="flex flex-col gap-4"
+		>
 			<div className="flex flex-col gap-2">
 				<Label htmlFor="contact-name">Name</Label>
 				<Input

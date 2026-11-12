@@ -3,7 +3,11 @@ import { filterContacts } from './filter-contacts'
 import type { Contact } from '../types/contact'
 
 const make = (id: string, name: string, email: string, phone: string): Contact => ({
-	id, name, email, phone, createdAt: '2024-01-01T00:00:00.000Z',
+	id,
+	name,
+	email,
+	phone,
+	createdAt: '2024-01-01T00:00:00.000Z',
 })
 const contacts = [
 	make('1', 'Zoe Zed', 'zoe@mail.com', '+1 555 0100'),

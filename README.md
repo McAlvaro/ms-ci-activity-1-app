@@ -8,12 +8,12 @@ npm install   # instala dependencias y activa los hooks mediante `prepare`
 
 ## Resumen
 
-| Requisito | Solución | Archivos |
-| --- | --- | --- |
-| 1. SonarLint y linter en el editor | ESLint (flat config) como LSP en Neovim; SonarLint con `sonarlint.nvim` | `eslint.config.js`, fragmentos Lua de este README |
-| 2. `.editorconfig` / config del linter | `.editorconfig` en la raíz (Neovim lo lee de forma nativa) | `.editorconfig`, `eslint.config.js` |
-| 3. Regla de tabuladores | `@stylistic/indent: ['error', 'tab']` | `eslint.config.js`, `package.json` |
-| 4. Hooks de Git | Husky + lint-staged (`eslint --fix`) + commitlint | `.husky/pre-commit`, `.husky/commit-msg`, `.husky/pre-push`, `commitlint.config.js`, `package.json` |
+| Requisito                              | Solución                                                                | Archivos                                                                                            |
+| -------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 1. SonarLint y linter en el editor     | ESLint (flat config) como LSP en Neovim; SonarLint con `sonarlint.nvim` | `eslint.config.js`, fragmentos Lua de este README                                                   |
+| 2. `.editorconfig` / config del linter | `.editorconfig` en la raíz (Neovim lo lee de forma nativa)              | `.editorconfig`, `eslint.config.js`                                                                 |
+| 3. Regla de tabuladores                | `@stylistic/indent: ['error', 'tab']`                                   | `eslint.config.js`, `package.json`                                                                  |
+| 4. Hooks de Git                        | Husky + lint-staged (`prettier --write` + `eslint --fix`) + commitlint  | `.husky/pre-commit`, `.husky/commit-msg`, `.husky/pre-push`, `commitlint.config.js`, `package.json` |
 
 ## 1. Linter y SonarLint
 
@@ -27,7 +27,9 @@ npm install   # instala dependencias y activa los hooks mediante `prepare`
 - `json`, `jsonc`, `yml`, `yaml`, `md`: 2 espacios.
 - `*.md`: `trim_trailing_whitespace = false`.
 
-## 3. Regla de tabuladores
+## 3. Regla de tabuladores y formato
+
+Formato con Prettier (`.prettierrc.json`: tabuladores, sin punto y coma, comillas simples, 100 columnas; `json`/`md`/`yaml` con 2 espacios). No se usa `eslint-config-prettier` para mantener activa la regla de tabuladores de ESLint.
 
 En `eslint.config.js` con `@stylistic/eslint-plugin`:
 
@@ -39,16 +41,17 @@ Scripts de `package.json`:
 
 - `npm run lint`: ESLint.
 - `npm run lint:fix`: `eslint . --fix`.
-- `npm run format`: `eslint . --fix --fix-type layout`.
-- `npm run check`: lint + typecheck + test + build.
+- `npm run format`: `prettier --write .` (todo el proyecto).
+- `npm run format:check`: `prettier --check .`.
+- `npm run check`: lint + format:check + typecheck + test + build.
 
 ## 4. Hooks (Husky + lint-staged)
 
-| Hook | Comando | Acción |
-| --- | --- | --- |
-| `pre-commit` | `npx lint-staged` | `eslint --fix` sobre archivos `js/ts/tsx` staged; corrige y re-agrega los archivos al commit. Bloquea solo si quedan errores sin corrección automática |
-| `commit-msg` | `npx --no -- commitlint --edit "$1"` | Conventional Commits: `tipo(scope): resumen`, scope obligatorio. Ejemplo: `feat(contacts): add search` |
-| `pre-push` | `npm run test` | Pruebas unitarias |
+| Hook         | Comando                              | Acción                                                                                                                                                                                                                  |
+| ------------ | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | `npx lint-staged`                    | Sobre archivos staged: `prettier --write` y luego `eslint --fix` en `js/ts/tsx`; `prettier --write` en `json/css`. Corrige y re-agrega los archivos al commit. Bloquea solo si quedan errores sin corrección automática |
+| `commit-msg` | `npx --no -- commitlint --edit "$1"` | Conventional Commits: `tipo(scope): resumen`, scope obligatorio. Ejemplo: `feat(contacts): add search`                                                                                                                  |
+| `pre-push`   | `npm run test`                       | Pruebas unitarias                                                                                                                                                                                                       |
 
 - `prepare`: `husky` (instala los hooks en `npm install`).
 - `commitlint.config.js`: `@commitlint/config-conventional` + `scope-empty` obligatorio.
@@ -108,7 +111,11 @@ return {
 }
 ```
 
-### c) SonarLint
+### c) Formato al guardar (Prettier)
+
+Con `conform.nvim` y `prettierd`/`prettier`, el formato usa el `.prettierrc.json` del proyecto; es consistente con `npm run format` y el `pre-commit`.
+
+### d) SonarLint
 
 Nota: la URL de `sonarlint.nvim`, el paquete `sonarlint-language-server` y la ruta del `.jar` NO están verificados.
 
@@ -143,7 +150,7 @@ Instalación: `:MasonInstall sonarlint-language-server`.
 
 ```bash
 npm run lint
-npm run check   # lint + typecheck + test + build (manual)
+npm run check   # lint + format:check + typecheck + test + build (manual)
 echo "feat(hooks): add commitlint" | npx commitlint
 git config core.hooksPath  # .husky/_
 ```

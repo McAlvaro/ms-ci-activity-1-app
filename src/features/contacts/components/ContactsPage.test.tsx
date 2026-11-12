@@ -3,7 +3,12 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { ContactsPage } from './ContactsPage'
 
-async function addContact(user: ReturnType<typeof userEvent.setup>, name: string, email: string, phone = '') {
+async function addContact(
+	user: ReturnType<typeof userEvent.setup>,
+	name: string,
+	email: string,
+	phone = '',
+) {
 	await user.click(screen.getByRole('button', { name: 'Add contact' }))
 	const dialog = await screen.findByRole('dialog', { name: 'Add contact' })
 	await user.type(within(dialog).getByLabelText('Name'), name)

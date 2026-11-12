@@ -4,10 +4,19 @@ import { useContacts } from './use-contacts'
 import type { ContactsStorage } from '../lib/contacts-storage'
 import type { Contact } from '../types/contact'
 
-const seed: Contact = { id: 's1', name: 'Seed', email: 's@x.com', phone: '', createdAt: '2024-01-01T00:00:00.000Z' }
+const seed: Contact = {
+	id: 's1',
+	name: 'Seed',
+	email: 's@x.com',
+	phone: '',
+	createdAt: '2024-01-01T00:00:00.000Z',
+}
 
 function fakeStorage(initial: Contact[] = []) {
-	return { load: vi.fn(() => initial), save: vi.fn<(contacts: Contact[]) => void>() } satisfies ContactsStorage
+	return {
+		load: vi.fn(() => initial),
+		save: vi.fn<(contacts: Contact[]) => void>(),
+	} satisfies ContactsStorage
 }
 
 describe('useContacts', () => {
@@ -27,8 +36,18 @@ describe('useContacts', () => {
 
 	it('updates a contact keeping id and createdAt', () => {
 		const { result } = renderHook(() => useContacts(fakeStorage([seed])))
-		act(() => result.current.updateContact('s1', { name: 'New', email: 'n@x.com', phone: '' }))
-		expect(result.current.contacts[0]).toEqual({ ...seed, name: 'New', email: 'n@x.com' })
+		act(() =>
+			result.current.updateContact('s1', {
+				name: 'New',
+				email: 'n@x.com',
+				phone: '',
+			}),
+		)
+		expect(result.current.contacts[0]).toEqual({
+			...seed,
+			name: 'New',
+			email: 'n@x.com',
+		})
 	})
 
 	it('deletes a contact', () => {

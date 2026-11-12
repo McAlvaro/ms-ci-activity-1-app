@@ -31,7 +31,9 @@ describe('ContactFormDialog', () => {
 		await user.type(screen.getByLabelText('Name'), 'Ada')
 		await user.type(screen.getByLabelText('Email'), 'ada@x.com')
 		await user.click(screen.getByRole('button', { name: 'Add contact' }))
-		await vi.waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ name: 'Ada', email: 'ada@x.com', phone: '' }))
+		await vi.waitFor(() =>
+			expect(onSubmit).toHaveBeenCalledWith({ name: 'Ada', email: 'ada@x.com', phone: '' }),
+		)
 		expect(onOpenChange).toHaveBeenCalledWith(false)
 	})
 })

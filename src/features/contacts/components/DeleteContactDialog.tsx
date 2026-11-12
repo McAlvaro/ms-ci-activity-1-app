@@ -23,12 +23,16 @@ export function DeleteContactDialog({ contact, onConfirm, onCancel }: DeleteCont
 				<AlertDialogHeader>
 					<AlertDialogTitle>Delete contact?</AlertDialogTitle>
 					<AlertDialogDescription>
-						{contact ? `${contact.name} will be permanently removed. This action cannot be undone.` : ''}
+						{contact
+							? `${contact.name} will be permanently removed. This action cannot be undone.`
+							: ''}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel>Cancel</AlertDialogCancel>
-					<AlertDialogAction onClick={() => contact && onConfirm(contact.id)}>Delete</AlertDialogAction>
+					<AlertDialogAction onClick={() => contact && onConfirm(contact.id)}>
+						Delete
+					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>
 		</AlertDialog>

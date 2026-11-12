@@ -15,7 +15,12 @@ interface ContactFormDialogProps {
 	onSubmit: (input: ContactInput) => void
 }
 
-export function ContactFormDialog({ open, onOpenChange, contact, onSubmit }: ContactFormDialogProps) {
+export function ContactFormDialog({
+	open,
+	onOpenChange,
+	contact,
+	onSubmit,
+}: ContactFormDialogProps) {
 	const title = contact ? 'Edit contact' : 'Add contact'
 
 	return (
@@ -29,7 +34,9 @@ export function ContactFormDialog({ open, onOpenChange, contact, onSubmit }: Con
 				</DialogHeader>
 				<ContactForm
 					key={contact?.id ?? 'new'}
-					defaultValues={contact && { name: contact.name, email: contact.email, phone: contact.phone }}
+					defaultValues={
+						contact && { name: contact.name, email: contact.email, phone: contact.phone }
+					}
 					submitLabel={contact ? 'Save changes' : 'Add contact'}
 					onCancel={() => onOpenChange(false)}
 					onSubmit={(input) => {

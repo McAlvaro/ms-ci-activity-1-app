@@ -3,7 +3,13 @@ import { createLocalStorageContactsStorage } from './contacts-storage'
 import type { Contact } from '../types/contact'
 
 const sample: Contact[] = [
-	{ id: '1', name: 'Ada', email: 'ada@x.com', phone: '', createdAt: '2024-01-01T00:00:00.000Z' },
+	{
+		id: '1',
+		name: 'Ada',
+		email: 'ada@x.com',
+		phone: '',
+		createdAt: '2024-01-01T00:00:00.000Z',
+	},
 ]
 
 afterEach(() => vi.restoreAllMocks())

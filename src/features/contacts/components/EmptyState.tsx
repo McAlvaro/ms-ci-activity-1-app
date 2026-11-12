@@ -9,7 +9,9 @@ export function EmptyState({ hasQuery }: EmptyStateProps) {
 				{hasQuery ? 'No contacts match your search' : 'No contacts yet'}
 			</p>
 			<p className="text-sm">
-				{hasQuery ? 'Try a different name, email or phone.' : 'Add your first contact to get started.'}
+				{hasQuery
+					? 'Try a different name, email or phone.'
+					: 'Add your first contact to get started.'}
 			</p>
 		</div>
 	)
